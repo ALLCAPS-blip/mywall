@@ -1,0 +1,289 @@
+---
+title: "Group 3 — Bodies and talk"
+subtitle: "Studio wall"
+author: "Group names here"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+---
+
+# Spine
+
+> How do bodies measure, how do people talk about mind and school, and how long do countries live?
+
+This sentence stays at the top. Every panel must attach to it. If a plot cannot be introduced in a clause that hangs off this line, it is off the wall.
+
+# Introduction — the tables we own
+```{r}
+library(ggformula)
+library(skimr)
+library(tidyverse)
+library(mosaic)
+```
+
+This folder is ours for the ten days. Three tables, three shapes.
+
+- **Panel A** (`panel-A.csv`) — body measures (`bdims`): height, weight, waist, hip, chest, age, sex. Stand-in for NHANES when that package is not on the machine.
+- **Panel B** (`panel-B.csv`) — GSS 2010: `degree`, `grass`, hours of work and rest. `mntlhlth` is *days* of poor mental health — a Quant. Do not mosaic it.
+- **Panel C** (`panel-C.csv`) — gapminder 2007: life expectancy, GDP per capita, population by country.
+
+Talk (B) and tape-measure (A) are different hunts.
+
+We load from this folder:
+
+
+```{r}
+library(skimr)
+library(tidyverse)
+library(ggformula)
+```
+
+A <- read_csv("panel-A.csv")
+```
+
+```
+```{r}
+panel_A <- read_csv("data/panel-A.csv")
+panel_B <- read_csv("data/panel-B.csv")
+panel_C <- read_csv("data/panel-C.csv")
+```
+
+Found tables train the mark. A campus Free Hunch, if we collect one, is a **made** panel of the same pair type — new people, old grammar. It does not replace A, B, or C.
+
+# Panel A — body / measure
+
+*height_cm, weight_kg, waist_cm are Quant. sex is Qual.*
+
+
+### 1. See the table
+
+What is a case? Which columns are Quant / Qual? What is missing?
+
+```r
+# glimpse() / inspect() / skim()
+```
+```{r}
+glimpse(panel_A)
+skim(panel_A)
+
+```
+
+
+
+### 2. Ask
+
+One question this table can answer. One it cannot. Write both.
+
+Who is heavier between men and women ?
+What is the proportion of men and women ?
+How does waist size vary for men and women ?
+How does hip size vary for men and women ?
+How does chest size vary for men and women ?
+
+### 3. Choose a mark
+
+Geom, map mark, or (later) test that matches the pair type. Name it before you code.
+
+Who is heavier between men and women ?
+-Histogram 
+
+What is the proportion of men and women ?
+-Bar
+
+How does waist size vary for men and women ?
+-Histogram
+
+How does hip size vary for men and women ?
+-Density
+
+How does chest size vary for men and women ?
+-Density
+
+Which sex is older in the given data-set ?
+-Histogram
+
+Who is taller between men and women ?
+-Histogram
+
+### 4. Predict
+
+What do we think we will see? One sentence, before Run.
+
+### 5. Make
+```{r}
+panel_A |> gf_histogram(~weight_kg,fill =~sex,bins = 50)
+```
+
+```{r}
+panel_A |> gf_bar(~sex,fill=~sex)
+```
+```{r}
+panel_A |> gf_histogram(~waist_cm,fill=~sex)
+```
+```{r}
+panel_A |> gf_density(~hip_cm,fill=~sex)
+```
+
+```{r}
+panel_A |> gf_density(~chest_cm,fill=~sex)
+```
+```{r}
+panel_A |> gf_bar(~ age, fill = ~ sex)
+```
+
+```{r}
+panel_A |> gf_histogram(~height_cm,fill =~sex,bins = 50)
+```
+```{r}
+panel_A |> gf_bar(~ age,)
+```
+
+```{r}
+panel_A |> gf_density(~weight_kg)
+```
+```{r}
+panel_A |> gf_density(~ height_cm,)
+```
+```{r}
+panel_A |> gf_density(~ waist_cm,)
+```
+```{r}
+panel_A |> gf_density(~ hip_cm,)
+```
+```{r}
+panel_A |> gf_density(~ chest_cm)
+```
+```{r}
+mosaic::t_test(hip_cm ~ sex, data = panel_A)
+```
+
+
+### 6. Say
+
+We all found the density graph comparing chest sizes of men and women interesting  because according to the graph, men have a bigger chest size than women which is quite unexpected. Men also have larger variation in the sizes while women have more difference in density for different sizes.
+This is surprising because according to the bar graph, the ratio of women is slightly more than men, in comparison.
+We also found the density graph comparing hip size of men and women surprising because it is contrasting the general belief that women have wider hips.
+
+### 7. Limit
+
+What this panel cannot do. Which kit table we refused to abuse.
+
+
+# Panel B — category / talk
+
+*degree × grass is Qual + Qual. mntlhlth is Quant — it belongs in a histogram or a grouped violin, not a mosaic.*
+
+
+### 1. See the table
+
+What is a case? Which columns are Quant / Qual? What is missing?
+
+```r
+# glimpse() / inspect() / skim()
+```
+
+### 2. Ask
+
+One question *this* table can answer. One it cannot. Write both.
+
+### 3. Choose a mark
+
+Geom, map mark, or (later) test that matches the pair type. Name it before you code.
+
+### 4. Predict
+
+What do we think we will see? One sentence, before Run.
+
+### 5. Make
+
+Human brick first. Optional: one AI prompt, pasted below, only for what section 3 named.
+
+```r
+# human chunk
+
+# ## Prompt we actually used
+# ai_draft
+# ours
+```
+
+### 6. Say
+
+Caption + one sentence we will stand behind. Title is a sentence, not a column name.
+
+### 7. Limit
+
+What this panel cannot do. Which kit table we refused to abuse.
+
+
+# Panel C — place
+
+*lifeExp is the honest fill. pop is a count — symbol map, not choropleth.*
+
+Geometry is not in the CSV. Join in R, then use the same seven headings.
+
+```r
+# library(sf)
+# library(rnaturalearth)
+# world <- ne_countries(scale = "medium", returnclass = "sf")
+# # join on country name; list the unmatched labels
+```
+
+
+### 1. See the table
+
+What is a case? Which columns are Quant / Qual? What is missing?
+
+```r
+# glimpse() / inspect() / skim()
+```
+
+### 2. Ask
+
+One question *this* table can answer. One it cannot. Write both.
+
+### 3. Choose a mark
+
+Geom, map mark, or (later) test that matches the pair type. Name it before you code.
+
+### 4. Predict
+
+What do we think we will see? One sentence, before Run.
+
+### 5. Make
+
+Human brick first. Optional: one AI prompt, pasted below, only for what section 3 named.
+
+```r
+# human chunk
+
+# ## Prompt we actually used
+# ai_draft
+# ours
+```
+
+### 6. Say
+
+Caption + one sentence we will stand behind. Title is a sentence, not a column name.
+
+### 7. Limit
+
+What this panel cannot do. Which kit table we refused to abuse.
+
+
+# Conclusion
+
+What the spine looks like after three panels.
+
+- The question we will defend in ninety seconds
+- What we will **not** claim
+- Which lines were human, which were machine
+- Limits: sample, missingness, the test we did not run
+- Gift for the steal-this strip (palette, annotation, join trick)
+
+```r
+# sessionInfo()
+```
+
+
+
