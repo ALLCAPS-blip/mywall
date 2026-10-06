@@ -265,9 +265,7 @@ But this could also be because the number of high schoolers in this dataset is m
 
 ### 7. Limit
 
-```{r}
-mosaic::xchisq.test(degree~grass, data=panel_B)
-```
+
 
 # Panel C — place
 
