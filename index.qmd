@@ -179,13 +179,15 @@ What this panel cannot do. Which kit table we refused to abuse.
 
 What is a case? Which columns are Quant / Qual? What is missing?
 
-```r
-# glimpse() / inspect() / skim()
+```{r}
+glimpse(panel_B)
+inspect(panel_B)
+skim(panel_B)
 ```
+
 
 ### 2. Ask
 
-One question *this* table can answer. One it cannot. Write both.
 
 ### 3. Choose a mark
 
