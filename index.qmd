@@ -45,7 +45,6 @@ A <- read_csv("panel-A.csv")
 ```
 ```{r}
 panel_A <- read_csv("data/panel-A.csv")
-panel_B <- read_csv("data/panel-B.csv")
 panel_C <- read_csv("data/panel-C.csv")
 ```
 
@@ -58,18 +57,14 @@ Found tables train the mark. A campus Free Hunch, if we collect one, is a **made
 
 ### 1. See the table
 
-What is a case? Which columns are Quant / Qual? What is missing?
+We have 6 quantitative variables in our data - age, weight_kg, height_cm, waist_cm, hip_cm, chest_cm.
+We have 1 quantitative variable - sex.
 
-```r
-# glimpse() / inspect() / skim()
-```
 ```{r}
 glimpse(panel_A)
 skim(panel_A)
-
+inspect(panel_A)
 ```
-
-
 
 ### 2. Ask
 
@@ -82,8 +77,6 @@ How does hip size vary for men and women ?
 How does chest size vary for men and women ?
 
 ### 3. Choose a mark
-
-Geom, map mark, or (later) test that matches the pair type. Name it before you code.
 
 Who is heavier between men and women ?
 -Histogram 
@@ -108,54 +101,74 @@ Who is taller between men and women ?
 
 ### 4. Predict
 
-What do we think we will see? One sentence, before Run.
+We predicted that the graph would depict the chest size and the hip size of women to be more than men.
+Referring to the stereotypical anatomy, we predict the variation in chest size and hip size of women to be more than men.
 
 ### 5. Make
+
+Who is heavier between men and women?
 ```{r}
 panel_A |> gf_histogram(~weight_kg,fill =~sex,bins = 50)
 ```
 
+What is the proportion of men and women?
 ```{r}
 panel_A |> gf_bar(~sex,fill=~sex)
 ```
+
+How does waist size vary for men and women?
 ```{r}
 panel_A |> gf_histogram(~waist_cm,fill=~sex)
 ```
+
+How does hip size vary for men and women ?
 ```{r}
 panel_A |> gf_density(~hip_cm,fill=~sex)
 ```
 
+How does chest size vary for men and women ?
 ```{r}
 panel_A |> gf_density(~chest_cm,fill=~sex)
 ```
+
+How does age vary for men and women?
 ```{r}
 panel_A |> gf_bar(~ age, fill = ~ sex)
 ```
 
+How does height vary for men and women?
 ```{r}
 panel_A |> gf_histogram(~height_cm,fill =~sex,bins = 50)
 ```
+
+How does age vary across the data-set?
 ```{r}
 panel_A |> gf_bar(~ age,)
 ```
 
+How does weight vary across the data-set?
 ```{r}
 panel_A |> gf_density(~weight_kg)
 ```
+
+How does height vary across the data-set?
 ```{r}
 panel_A |> gf_density(~ height_cm,)
 ```
+
+How does waist size vary across the data-set?
 ```{r}
 panel_A |> gf_density(~ waist_cm,)
 ```
+
+How does hip size vary across the data-set?
 ```{r}
 panel_A |> gf_density(~ hip_cm,)
 ```
+
+How does chest size vary across the data-set?
 ```{r}
 panel_A |> gf_density(~ chest_cm)
-```
-```{r}
-mosaic::t_test(hip_cm ~ sex, data = panel_A)
 ```
 
 
@@ -166,18 +179,33 @@ This is surprising because according to the bar graph, the ratio of women is sli
 We also found the density graph comparing hip size of men and women surprising because it is contrasting the general belief that women have wider hips.
 
 ### 7. Limit
+```{r}
+panel_A |> group_by(sex) |> summarize (mean_chest_cm = mean(chest_cm, na.rm = T))
+```
 
-What this panel cannot do. Which kit table we refused to abuse.
 
+```{r}
+mosaic::t_test(chest_cm ~ sex, data = panel_A)
+```
 
 # Panel B — category / talk
 
-*degree × grass is Qual + Qual. mntlhlth is Quant — it belongs in a histogram or a grouped violin, not a mosaic.*
-
+degree × grass is Qual + Qual. mntlhlth is Quant — it belongs in a histogram or a grouped violin, not a mosaic.
 
 ### 1. See the table
 
 What is a case? Which columns are Quant / Qual? What is missing?
+
+The quantitative variables in  the dataset are -hours of relaxation(hrsrelax), hours of labour (hrsl) and mental health(mntlhlth) {3}
+The qualitative variables in  the dataset are-degree, marijuana(grass) {2}
+
+We have 2 qualitative variables - degree [education] and grass [marijuana].
+We have 3 quantitative variables - mntlhlth [mental health], hrsl [hours of labour], hrsrelax [hours of relaxation]
+
+```{r}
+panel_B <- read_csv("data/panel-B.csv")
+```
+
 
 ```{r}
 glimpse(panel_B)
@@ -188,35 +216,58 @@ skim(panel_B)
 
 ### 2. Ask
 
+Does the education of a person affect their opinions on whether grass should be legal or not?
+
 
 ### 3. Choose a mark
 
-Geom, map mark, or (later) test that matches the pair type. Name it before you code.
+Does the education of a person affect their opinions on whether grass should be legal or not?
+- Mosaic Graph
 
 ### 4. Predict
 
-What do we think we will see? One sentence, before Run.
+we predict that a person pursuing a higher education degree would want marijuana to be legal, to regulate stress levels and mental health.
 
 ### 5. Make
 
-Human brick first. Optional: one AI prompt, pasted below, only for what section 3 named.
-
-```r
-# human chunk
-
-# ## Prompt we actually used
-# ai_draft
-# ours
+```{r}
+panelB_mod <- panel_B |> drop_na(grass)
 ```
+
+```{r}
+dim(panelB_mod)
+```
+
+```{r}
+vcd::structable(degree~grass, data = panel_B)
+```
+
+```{r}
+vcd::structable(degree ~ grass, data = panel_B )
+```
+
+```{r}
+vcd::structable(degree~grass, data=panel_B) |>
+  vcd::mosaic(labeling_args = list(rot_labels = c(top = 45)),
+              margins = c(top = 6))
+```
+```{r}
+vcd::structable(degree~grass,data=panel_B) |> vcd :: mosaic(type="expected",labeling_args = list(rot_labels = c(top = 45)),margins = c(top = 6))
+```
+
+
 
 ### 6. Say
 
-Caption + one sentence we will stand behind. Title is a sentence, not a column name.
+Looking at the graph, the ratio of people who think marijuana should be legal and not legal appears to be similar, in each individual degree. 
+Saying that, it is surprising information to see that the percentage of high schoolers who want marijuana to be legal is way larger than any other degrees.
+But this could also be because the number of high schoolers in this dataset is much more.
 
 ### 7. Limit
 
-What this panel cannot do. Which kit table we refused to abuse.
-
+```{r}
+mosaic::xchisq.test(degree~grass, data=panel_B)
+```
 
 # Panel C — place
 
