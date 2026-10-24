@@ -15,11 +15,20 @@ format:
 This sentence stays at the top. Every panel must attach to it. If a plot cannot be introduced in a clause that hangs off this line, it is off the wall.
 
 # Introduction — the tables we own
+
+{{< include _setup.qmd >}}
+
 ```{r}
 library(ggformula)
 library(skimr)
 library(tidyverse)
 library(mosaic)
+library(skimr)
+library(tidyverse)
+library(ggformula)
+library(rnaturalearth)
+library(sf)
+library(leaflet)
 ```
 
 This folder is ours for the ten days. Three tables, three shapes.
@@ -34,9 +43,7 @@ We load from this folder:
 
 
 ```{r}
-library(skimr)
-library(tidyverse)
-library(ggformula)
+
 ```
 
 A <- read_csv("panel-A.csv")
@@ -45,7 +52,6 @@ A <- read_csv("panel-A.csv")
 ```
 ```{r}
 panel_A <- read_csv("data/panel-A.csv")
-panel_C <- read_csv("data/panel-C.csv")
 ```
 
 Found tables train the mark. A campus Free Hunch, if we collect one, is a **made** panel of the same pair type — new people, old grammar. It does not replace A, B, or C.
@@ -108,7 +114,7 @@ Referring to the stereotypical anatomy, we predict the variation in chest size a
 
 Who is heavier between men and women?
 ```{r}
-panel_A |> gf_histogram(~weight_kg,fill =~sex,bins = 50)
+panel_A |> gf_histogram(~weight_kg,fill =~sex,bins = 50, title = "my new crazy graph", caption = "arvind is listening to me finally", subtitle = "pink floyd is the best band")
 ```
 
 What is the proportion of men and women?
@@ -269,58 +275,138 @@ But this could also be because the number of high schoolers in this dataset is m
 
 # Panel C — place
 
-*lifeExp is the honest fill. pop is a count — symbol map, not choropleth.*
-
 Geometry is not in the CSV. Join in R, then use the same seven headings.
-
-```r
-# library(sf)
-# library(rnaturalearth)
-# world <- ne_countries(scale = "medium", returnclass = "sf")
-# # join on country name; list the unmatched labels
-```
 
 
 ### 1. See the table
 
 What is a case? Which columns are Quant / Qual? What is missing?
 
-```r
-# glimpse() / inspect() / skim()
+Qualitative Columns:
+1) Country; (country)
+2) Continent; (continent)
+
+Quantitative Columns:
+1) Year; (year)
+2) Life Expectency; (lifeExp)
+3) Population of the Country; (pop)
+4) Per Capita GDP; (gpdPercap)
+
+Missing Columns:
+1) Sex ?
+
+```{r}
+C <- read_csv(file = "data/panel-C.csv")
+C
 ```
+
+```{r}
+skim(C)
+```
+
+```{r}
+inspect(C)
+```
+
+```{r}
+glimpse(C)
+```
+
+```{r}
+C_mod <- C |> mutate(across(where(is.character),as.factor))
+C_mod |> glimpse()
+```
+
+```{r}
+world <- rnaturalearth::ne_countries(returnclass = "sf")
+glimpse(world)
+```
+
+```{r}
+world
+```
+
+```{r}
+world |> ggformula::gf_sf(geometry = ~geometry)
+```
+
+```{r}
+world <- rnaturalearth::ne_countries(scale = "medium", returnclass = "sf")
+glimpse(world)
+```
+
+```{r}
+world_selected <- world |>  dplyr::select(name,geometry)
+```
+
+```{r}
+glimpse(world)
+```
+
+```{r}
+C_modd <- C_mod |> left_join(world_selected, by = c("country" = "name"))
+glimpse(C_modd)
+```
+
 
 ### 2. Ask
 
-One question *this* table can answer. One it cannot. Write both.
+Questions which we can answer.
+1) Which countries have the lowest Life expectancy?
+2) Is there a relation between Population of a country and the GDP Per Capita ? Is the GDP value higher with higher population?
+
+Questions which we cannot answer.
+1) Why do some countries have a high GDP per Capita but low life expectancy?
+2) What percentage of women help a country build their per Capita?
 
 ### 3. Choose a mark
 
-Geom, map mark, or (later) test that matches the pair type. Name it before you code.
+Question 1; Can be answered
+Which countries have the lowest Life expectancy?
+```{r}
+C_modd |> gf_sf(geometry = ~geometry, fill = ~lifeExp, color = "black")
+```
+Question 2; Can be answered
+
+Is there a relation between Population of a country and the Per capita GDP? Is the GDP value higher with higher population?
+```{r}
+C_modd |> gf_sf(geometry = ~geometry, fill = ~gdpPercap, color = ~pop) |> gf_refine(ggplot2::scale_color_gradient(low = "#A1FA4F", high = "#183E0C")) |> gf_refine(ggplot2::scale_fill_gradient(low = "#FFFE91", high = "#BA1B1B"))
+```
+
+-----------------------------------------------------
+
+Question 1; Cannot be answered
+
+Why do some countries have a high GDP per capita but low life expectancy?
+```{r}
+C_modd |> gf_sf(geometry = ~geometry, fill = ~gdpPercap, color = ~lifeExp) |> gf_refine(ggplot2::scale_fill_gradient(low = "#A1FB8E", high = "#00023D")) |> gf_refine(ggplot2::scale_color_gradient(low = "#FF9CA7", high = "#661E18"))
+
+```
+
+Question 2; Cannot be answered
+What percentage of women help a country build their per capita?
+```{r}
+C_modd |> gf_sf(geometry = ~geometry, fill = ~gdpPercap, color = ~pop) |> gf_refine(ggplot2::scale_color_gradient(low = "yellow", high = "green")) |> gf_refine(ggplot2::scale_fill_gradient(low = "#C8BFE7", high = "#A349A4"))
+
+```
 
 ### 4. Predict
 
-What do we think we will see? One sentence, before Run.
+We predict that there would be a good graph, showing Africa in a stable state. (This however was very much not the truth)
 
-### 5. Make
+### 5. Say
 
-Human brick first. Optional: one AI prompt, pasted below, only for what section 3 named.
+Title: Africa; A data visualization
 
-```r
-# human chunk
+Caption: These graphs show different aspects like Life expectancy, Overall population and Per Capita GDP in different African countries.
 
-# ## Prompt we actually used
-# ai_draft
-# ours
-```
+oNE STATEMENT WE WILL STAND BY:
+Most of Africa is in a pretty bad state, when it comes to the data collected in this set. 
 
-### 6. Say
+### 6. Limit
 
-Caption + one sentence we will stand behind. Title is a sentence, not a column name.
-
-### 7. Limit
-
-What this panel cannot do. Which kit table we refused to abuse.
-
+Some countries are not shown on the map due to the country not existing in world database.
+We cannot tell the difference in life expectancy between women, men and other genders.
 
 # Conclusion
 
@@ -332,9 +418,150 @@ What the spine looks like after three panels.
 - Limits: sample, missingness, the test we did not run
 - Gift for the steal-this strip (palette, annotation, join trick)
 
-```r
-# sessionInfo()
+## Panel D: The Hinkley Case
+
+In *Erin Brockovich* (2000), a seemingly ordinary investigation turns into a fight against a corporation that has been poisoning an entire community. While working at a law firm, Erin discovers medical records linking residents of Hinkley, California, to hexavalent chromium contamination caused by Pacific Gas and Electric (PG&E).
+
+This map follows the places and people at the centre of that story. The PG&E facility marks the source of the contamination, while the highlighted groundwater area and expanding plume represent how the pollution spread beyond the company's boundaries. The outlined area frames the affected community, and the markers identify residents whose lives became part of Erin's investigation.
+
+The locations of Donna Jensen, Pete Goya and Roberta Walker connect the geographical data to the people behind the case. In the film, Erin's visits to residents' homes reveal what corporate records and medical files alone cannot fully convey: the fear, illness and uncertainty experienced by ordinary families.
+
+What begins as a map of a small desert town becomes a map of accountability. By placing the facility, contamination and residents within the same landscape, the visualization reflects the central idea of the film: the truth was not hidden in a single document, but scattered across the lives of the people affected.
+
+1. Setting Up
+
+2. Playing with Maps
+
+```{r}
+h <- leaflet() %>%
+   
+    addTiles() %>%
+    # Set view to be roughly centred on Hinkley, CA,USA
+   setView(lng = -117.18937683138594, lat = 34.919081905328625, zoom = 13.4)
+
+ h
 ```
 
+```{r}
+map_esri_imagery <- leaflet() %>% 
+    setView(lng = -117.18937683138594, lat = 34.919081905328625, zoom = 13
+            
+          ) %>% 
+    addProviderTiles("Esri.WorldImagery") %>% 
+     addCircleMarkers (lng = -117.1990,
+                     lat = 34.9300,
+                     radius = 5,
+                     color = "brown",
+                     fillOpacity = 1,
+                     label = "Hinkley, CA")
 
+map_esri_imagery 
+```
+
+```{r}
+h %>% addMarkers(
+  lng = -117.1622383607778, lat = 34.90374722777231,
+  popup = "Pacific Gas and Electric (PG & E) Company" 
+)
+```
+
+```{r}
+h %>% 
+addCircles(
+    lng =  -117.18937683138594,
+    lat = 34.919081905328625,
+    radius = 4500, 
+    stroke = TRUE,
+    color = "yellow",
+    weight = 3, 
+    fill = TRUE,
+    fillColor = "red"
+  )
+```
+
+```{r}
+leaflet() %>%
+  addTiles() %>%
+  setView(lng = -117.18937683138594, lat = 34.919081905328625, zoom = 13) %>%
+  addRectangles(
+    lat1 = 34.9050, lng1 = -117.22524624156321,
+    lat2 = 34.9600, lng2 = -117.13746251715695
+)
+```
+
+```{r}
+leaflet() %>%
+  addTiles() %>%
+  setView(lng = -117.18937683138594, lat = 34.919081905328625, zoom = 12) %>%
+ 
+  addPolygons(
+    lng = c(-117.26379965144292, -117.11855776559129, -117.14402382941634, -117.22217000652593),
+  lat = c(34.95749774996647, 34.93752074954549, 34.882027322658615, 34.88735462976936)
+  )
+```
+
+3. The Final Map
+
+```{r}
+hinkley_map <- leaflet() %>%
+  addTiles() %>%
+  setView(lng = -117.18937683138594, lat = 34.919081905328625, zoom = 13) %>%
+  
+  # Hinkley area boundary
+  addPolygons(
+    lng = c(-117.22470796056894, -117.145817921965, -117.14271734585267, -117.21113496405178),
+    lat = c(34.94412761049036, 34.93621954324678, 34.89112358375753, 34.89344061852938),
+    color = "black",
+    weight = 2,
+    fill = FALSE 
+  ) %>%
+  
+  # PG&E marker
+  addMarkers(
+    lng = -117.1622383607778, 
+    lat = 34.90374722777231,
+    popup = "PG & E : Providing water and cancer and hexavalent chromium to residents since 1952."
+  ) %>%
+  
+  # Groundwater
+  addCircles(
+    lng = -117.18937683138594,
+    lat = 34.919081905328625,
+    radius = 3300,
+    stroke = TRUE,
+    color = "black", 
+    weight = 0.5,
+    fill = TRUE,
+    fillColor = "blue", popup = "groundwater"
+  ) %>%                          
+  
+  # Contamination plume
+  addCircles(
+    lng = c(-117.1622, -117.1680, -117.1750, -117.1820, -117.1894, -117.2050),
+    lat = c(34.9037, 34.9060, 34.9100, 34.9150, 34.9191, 34.9280),
+    radius = c(300, 450, 600, 750, 900, 1200),
+    color = "brown",
+    weight = 1,
+    fillColor = "orange",
+    fillOpacity = 0.15,
+    label = "Chromium-6 Contamination Plume"
+  ) %>%                          
+  
+  # Hinkley residents
+  addCircleMarkers(
+    lng = c(-117.20203292072142, -117.17925890572414, -117.19772687683383),
+    lat = c(34.92896619928256, 34.907178991393415, 34.9219608916045),
+    radius = 6,
+    color = "red",
+    fillColor = "red",
+    fillOpacity = 0.8,
+    popup = c(
+      "Donna Jensen - Children were playing in contaminated water, first family Erin visited",
+      "Pete Goya - Hinkley resident affected by Chromium-6",
+      "Roberta Walker - Key community member who worked with Erin"
+    )
+  )
+
+hinkley_map
+```
 
