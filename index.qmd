@@ -565,3 +565,303 @@ hinkley_map <- leaflet() %>%
 hinkley_map
 ```
 
+#Panel E
+
+## Hunch 1 - Do girls have a higher monthly allowance than guys?
+#### Authors: Siva, Tanishka, Jai and Shaariq
+
+We collected data from across the campus. The consists of allowance number from 30 guys and 30 girls. They are all college students and not working.
+
+```{r}
+allowance <- read_csv("data/allowance.csv")
+view(allowance)
+
+glimpse(allowance)
+skim(allowance)
+```
+
+The gender variable is a character variable and we need to mutate it into factor.
+
+```{r}
+allowance <- allowance %>% 
+  mutate(gender = as.factor(gender))
+
+glimpse(allowance)
+view(allowance)
+skim(allowance)
+```
+
+We will use a histogram to take a look at the overall trend of allowance with girls and boys. We will then do a mosaic T.test to see if the difference carries any weight to it or if it's simply by chance.
+
+```{r}
+
+names(allowance)
+allowance |> gf_histogram(~ allowance, fill = ~gender)
+
+mosaic::t.test(allowance ~ gender, data = allowance)
+```
+
+
+According to the T.test, the p value is 0.49 which is much higher than 0.05. Which means that being a boy or a girl has no affect on monthly allowance which is really nice in because equality.
+
+## Hunch 2 - Some peasants make friends easier.
+#### Authors: 
+
+The hunch was that MIT students are in more relationships than SMI students.
+
+This group collected data from MIT campus and SMI campus. I then had to change the nomenclature of the variables as it was named "Relationship Status" and "Department" which was confusing R. I changed them to "relationship_status" and "department".
+
+
+```{r}
+relationship <- read_csv("data/relationships.csv")
+view(relationship)
+
+glimpse(relationship)
+skim(relationship)
+```
+
+The relationship_status and department variable is a character variable and we need to mutate it into factor.
+
+```{r}
+names(relationship)
+relationship <- relationship %>% 
+  mutate(department = as.factor(department))
+relationship <- relationship %>% 
+  mutate(relationship_status = as.factor(relationship_status))
+glimpse(relationship)
+```
+
+We will be doing a proportionality test by using a bar graph and using position = "fill" to make it proportional.
+
+```{r}
+relationship |> gf_bar(~ relationship_status, fill = ~department, position = "fill")
+
+```
+
+From the proportion bar graph we can see that both the departments are pretty fairly in the middle of both the yes and the no column. So we can conclude that it does not matter if you are in SMI or MIT, your odds of being in a relationship remain the same.
+
+## Hunch 3 - there are more introverts in SMI than in MIT.
+#### Authors: 
+
+This group had collected the personality types of people from both SMI and MIT. I only needed to know where they were extroverted or introverted, so I gave a number to each person. 1 for extroverted and 2 for introverted. 0 if the personality type wasn't available since there were a few n/a entries.
+
+```{r}
+data <- read_csv("data/introextro.csv")
+
+glimpse(data)
+skim(data)
+
+```
+
+We only need the department variable and type variable, and convert them both into factors.
+
+```{r}
+dataM <- data %>% 
+  mutate(dept = as.factor(dept), typn = as.factor(typn))
+glimpse(dataM)
+```
+
+Now for graphs, I did two kinds of bar graphs and a mosaic graph.
+Then I did a chi-square test filtering out the n/a entries.
+
+```{r}
+dataM |> gf_bar(~dept, fill = ~typn, position = "dodge")
+dataM |> gf_bar(~dept, fill = ~typn, position = "fill")
+dataM |> filter(typn != 0) |> gf_bar(~ dept, fill = ~typn, position = "fill")
+vcd::mosaic(~dept + typn, data = dataM) 
+
+dataM2 <- dataM |> filter(typn != 0) |> droplevels()
+mosaic::xchisq.test(dept ~ typn, data = dataM2)
+```
+
+IN THIS SAMPLE:
+From the bargraph, MIT clearly has more extroverts than introverts and SMI has way more introverts than extroverts.
+The difference between extroverts and introverts are smaller in MIT compared to the much larger difference in SMI.
+
+The chi square test suggests that there is no sufficient statistical evidence to conclude that SMI students are more introverted than MIT students since the p value is 0.1571.
+
+## Hunch 4 - Design students believe in AI more than art students.
+#### Authors: 
+
+This group collected and segregated the data based off whether the individual was enrolled in a design-centered program (CAC, IADP, BSSD) at SMI, vs an art-centered program (CAP, DM) - to see whether a certain group believes and trusts AI more than the other.. There was another factor of gender in the data collected.
+
+
+```{r}
+ai <- read_csv("data/ai_belief.csv")
+
+glimpse(ai)
+skim(ai)
+
+```
+
+
+<count> is just an ID number, and <gender>, <program>, <AI_belief> are characters, which get mutated into factors.
+
+```{r}
+ai <- ai %>% 
+  mutate(gender = as.factor(gender),
+         program = as.factor(program),
+         AI_belief = as.factor(AI_belief))
+
+glimpse(ai)
+```
+
+The first graph is a bar graph comparing art and design on the basis of a yes/no answer. 
+Inference: design is about half yes (16 of 30), and art is a bit lower (12 of 30)
+
+```{r}
+ai |> gf_bar(~ program, fill = ~ AI_belief, position = "fill")
+```
+
+The second graph is similar to the first one, only that it compares genders on the basis of a yes/no answer.
+Inference: boys are mostly yes (19 of 30) and girls are mostly no (21 of 30)
+
+```{r}
+ai |> gf_bar(~ gender, fill = ~ AI_belief, position = "fill")
+```
+
+The mosaic charts will help in visualising the data with what should be the "ideal" data.
+Inference: the gender mosaic has a lopsided split, and the program one looks nearly even.
+
+```{r}
+vcd::mosaic(~ program + AI_belief, data = ai, shade = TRUE)
+vcd::mosaic(~ gender + AI_belief, data = ai, shade = TRUE)
+```
+
+Looking at the p-values in the chi-sq tests: 
+1. Program - p ≈ 0.30, so not enough evidence. Art and design could easily look this different just by chance.
+2. Gender - p ≈ 0.01, below 0.05, so the gap between boys and girls is unlikely to be chance in this sample.
+
+```{r}
+mosaic::xchisq.test(AI_belief ~ program, data = ai)
+mosaic::xchisq.test(AI_belief ~ gender, data = ai)
+```
+
+Limit: 60 students from only SMI, one college. Yes/no answer doesn't tell us how strongly a person feels about AI. (Likert plots coul've been used if the data was collected in that format)
+
+IN THIS SAMPLE:
+From the bar graphs, design students say yes to AI a little more than art students (16 out of 30 vs 12 out of 30), but the gap is pretty small. But with gender: 19 out of 30 boys said yes, while only 9 out of 30 girls did.
+
+The chi-square test for program gives a p value of 0.30, which is way above 0.05, so we can’t say design students believe in AI more than art students. Program doesn’t seem to matter.
+
+The chi-square test for gender gives a p value of 0.01, which is below 0.05. So in this sample, boys are more likely to believe in AI than girls. We still can’t say why, and with only 60 students from one campus, we’d need a bigger group before saying this is true everywhere.
+
+## Hunch 5 - Friends vs Modern Family vs House vs Big Bang Theory vs… BAH!!
+
+#### Authors:
+
+This group collected ratings from students for four sitcoms: *Friends*, *Modern Family*, *House*, and *The Big Bang Theory*. The aim was to compare how students rated these shows and see which one came out on top. We looked at the average ratings, the spread of ratings, and how frequently different scores appeared.
+
+First, we imported the dataset and checked its structure to understand how the data was organised.
+
+```{r}
+students <- read_csv("data/students.csv")
+```
+
+```{r}
+View(students)
+names(students)
+str(students)
+```
+
+The columns were renamed to make them easier to work with. The ratings were then converted into numeric values, with blank entries treated as missing values.
+
+```{r}
+names(students) <- c("Student", "BigBang", "House",
+                     "ModernFamily", "Friends")
+```
+
+```{r}
+for (i in 2:5) {
+  students[[i]] <- trimws(as.character(students[[i]]))
+  students[[i]][students[[i]] == ""] <- NA
+  students[[i]] <- as.numeric(students[[i]])
+}
+```
+
+We checked the dataset again to make sure the columns had the correct data types.
+
+```{r}
+str(students)
+View(students)
+```
+
+To compare the four shows, we reshaped the dataset so that each row represents one student's rating for one show. Missing ratings were removed from the analysis.
+
+```{r}
+ratings <- pivot_longer(
+  students,
+  cols = c(BigBang, House, ModernFamily, Friends),
+  names_to = "Show",
+  values_to = "Rating"
+)
+
+ratings <- ratings[!is.na(ratings$Rating), ]
+```
+
+The first graph is a bar graph comparing the average rating of each sitcom. This gives us an overview of which show received the highest and lowest average ratings in our sample.
+
+```{r}
+averages <- aggregate(Rating ~ Show, data = ratings, FUN = mean)
+
+ggplot(averages, aes(x = Show, y = Rating)) +
+  geom_col(fill = "steelblue") +
+  geom_text(aes(label = round(Rating, 2)), vjust = -0.5) +
+  scale_y_continuous(limits = c(0, 10), breaks = 0:10) +
+  labs(
+    title = "Average Ratings of TV Shows",
+    x = "TV Show",
+    y = "Average Rating out of 10"
+  ) +
+  theme_minimal()
+```
+
+**Inference:** The bar graph helps us identify which show has the highest average rating and which has the lowest. However, the average alone does not tell us whether students generally agreed about a show's quality or whether their ratings varied considerably.
+
+The second graph is a box plot comparing the distribution of ratings for each show. It shows the median, the spread of ratings, and any potential outliers.
+
+```{r}
+ggplot(ratings, aes(x = Show, y = Rating)) +
+  geom_boxplot(fill = "coral") +
+  scale_y_continuous(breaks = 1:10, limits = c(1, 10)) +
+  labs(
+    title = "Distribution of Ratings by TV Show",
+    x = "TV Show",
+    y = "Rating out of 10"
+  ) +
+  theme_minimal()
+```
+
+**Inference:** The box plot helps us compare how consistent the ratings were for each show. A smaller box suggests that the middle half of the ratings were more closely grouped, while a larger box suggests more variation in opinions. The median also helps us compare the typical rating for each sitcom.
+
+The third graph consists of histograms showing the distribution of ratings for all four shows. These help us see which scores were most common and whether ratings tended towards the higher or lower end of the scale.
+
+```{r}
+ggplot(ratings, aes(x = Rating)) +
+  geom_histogram(
+    binwidth = 1,
+    boundary = 0.5,
+    fill = "darkseagreen",
+    color = "black"
+  ) +
+  facet_wrap(~ Show) +
+  scale_x_continuous(breaks = 1:10, limits = c(0.5, 10.5)) +
+  labs(
+    title = "Distribution of Sitcom Ratings",
+    x = "Rating out of 10",
+    y = "Number of Students"
+  ) +
+  theme_minimal()
+```
+
+**Inference:** The histograms show which ratings appeared most frequently for each sitcom. Ratings concentrated towards the higher end suggest that students generally liked a show, while ratings spread across the scale suggest more varied opinions. The graphs also help explain why two shows might have similar average ratings despite having different distributions.
+
+### Limitations
+
+The data only represents the students who participated in the survey, so it may not reflect the opinions of a larger population. Some students may not have watched all four shows, and missing ratings could affect the comparisons. Ratings are subjective, since everyone has different tastes and preferences. A higher average rating also does not necessarily mean that a show is objectively better than the others.
+
+### IN THIS SAMPLE:
+
+The graphs compare student ratings for *Friends*, *Modern Family*, *House*, and *The Big Bang Theory*. The average-rating graph shows which sitcom scored highest overall, while the box plot and histograms help us understand how consistent or varied the responses were.
+
+Together, the three graphs provide a snapshot of sitcom preferences within our sample. The average ratings help compare the overall scores, while the distribution graphs show whether students tended to agree or had very different opinions. These findings describe only the students who responded to our survey and cannot automatically be generalised to a wider population. Ultimately, the results give us an idea of which sitcoms this group preferred, even if the question of which show is actually the best remains up for debate.
